@@ -1,0 +1,1 @@
+create table point(id int identity primary key, x int, y int);

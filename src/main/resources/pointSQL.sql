@@ -1,0 +1,1 @@
+insert into point(x,y) values (1,2);
