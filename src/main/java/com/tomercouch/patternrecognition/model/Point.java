@@ -1,9 +1,11 @@
 package com.tomercouch.patternrecognition.model;
 
-import javax.persistence.*;
-import javax.validation.constraints.*;
-
-import static java.lang.Integer.parseInt;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.validation.constraints.Digits;
+import javax.validation.constraints.NotNull;
 
 
 // TODO: separate Point model from PointDTO
@@ -15,11 +17,11 @@ public class Point {
 
     @NotNull
     @Digits(integer=10, fraction = 0, message = "X is not an integer type")
-    private int x;
+    private Integer x;
 
     @Digits(integer=10, fraction = 0, message = "Y is not an integer type")
     @NotNull
-    private int y;
+    private Integer y;
 
     public Point(){
 
@@ -44,15 +46,15 @@ public class Point {
         return x;
     }
 
-    public void setX(String x){
-            this.x = parseInt(x);
+    public void setX(Integer x){
+        this.x = x;
     }
 
     public int getY() {
         return y;
     }
 
-    public void setY(String y){
-            this.y = parseInt(y);
+    public void setY(Integer y){
+            this.y = y;
     }
 }
