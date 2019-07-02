@@ -1,62 +1,65 @@
 package com.tomercouch.patternrecognition.controller;
 
-import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpHeaders;
+import com.tomercouch.patternrecognition.model.LineSegment;
+import com.tomercouch.patternrecognition.model.Point;
+import com.tomercouch.patternrecognition.repository.LineSegmentRepository;
+import com.tomercouch.patternrecognition.repository.PointRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.http.HttpStatus;
-
-import com.tomercouch.patternrecognition.model.Point;
-import com.tomercouch.patternrecognition.repository.PointRepository;
-import org.springframework.web.context.request.WebRequest;
-import sun.rmi.runtime.Log;
 
 import javax.validation.Valid;
-import javax.xml.ws.Response;
+import java.util.List;
 
 @RestController
 public class PatternRecognitionController {
 
+    @Autowired
     private PointRepository PointRepository;
+    @Autowired
+    private LineSegmentRepository LineRepository;
 
-    public PatternRecognitionController(PointRepository PointRepository) {
-        this.PointRepository = PointRepository;
-    }
+    @Autowired PlaneController PlaneController;
 
+    // TODO: produces app/json not text
     @PostMapping(path= "/point", consumes = "application/json", produces = "text/plain")
     public ResponseEntity<String> addPoint(@Valid @RequestBody Point point, BindingResult bindingResult) {
-        Logger logger = LoggerFactory.getLogger(PatternRecognitionController.class);
-
         if(bindingResult.hasErrors()) {
-            logger.info("Error while crating point");
             return ResponseEntity.badRequest().body("Point input is not valid");
-        }else{
-            logger.info(point.getX() + "y :" + point.getY());
-            PointRepository.save(point);
-            return ResponseEntity.ok("Point created successfully");
         }
+
+        boolean isPointExists = PointRepository.findByXAndY(point.getX(),point.getY()) != null;
+
+        if (isPointExists) {
+                return ResponseEntity.unprocessableEntity().body("Point already exists on the plane");
+            }
+
+            PlaneController.updatePlane(point);
+
+        return ResponseEntity.ok("Point created successfully");
     }
 
-        @GetMapping("/space")
-    public List<Point> getPoints() {
-        return PointRepository.findAll();
-    }
 
-    // TODO: create LineSegment logic -> and create a function to find all lineSegments -> later, maybe -> lineSegments has his own logic in a different controller
+    // It returns all lines that contain at list N intersecting points
     @GetMapping("/lines/{n}")
-    public List<Point> getLineSegments(@RequestParam int n){
-        return null;
+    public List<LineSegment> getLineSegments(@PathVariable int n){
+        return LineRepository.findByPointCount(n);
     }
 
+    // It removes all points from the plane (i.e. removes points from space)
     @DeleteMapping("/space")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<String> deletePoints() {
+        LineRepository.deleteAll();
         PointRepository.deleteAll();
         return ResponseEntity.ok("Space is clear");
+    }
+
+    // It returns all points on the plane (i.e. space)
+    @GetMapping("/space")
+    public List<Point> getPoints() {
+        return PointRepository.findAll();
     }
 }

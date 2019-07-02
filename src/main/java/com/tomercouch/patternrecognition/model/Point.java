@@ -1,10 +1,6 @@
 package com.tomercouch.patternrecognition.model;
 
-
-import javax.persistence.Entity;
-        import javax.persistence.GeneratedValue;
-        import javax.persistence.GenerationType;
-        import javax.persistence.Id;
+import javax.persistence.*;
 import javax.validation.constraints.*;
 
 import static java.lang.Integer.parseInt;
